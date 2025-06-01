@@ -91,27 +91,33 @@ const handleEdit = () => {
   }
 }
   return (
-    <div className="note-item" style={{ border: '1px solid #ccc', padding: '0.5rem', margin: '0.5rem 0' }}>
-      <div className="note-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div
+      className="note-item"
+      style={{ border: '1px solid #ccc', padding: '0.5rem', margin: '0.5rem 0' }}
+    >
+      <div
+        className="note-header"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+      >
         <h3 style={{ margin: 0 }}>{note.title}</h3>
         <div className="note-actions">
           {onEdit && (
-          <button
-            className="edit-button"
-            onClick={handleEdit}
-            disabled={deleting}    // now disabled when 'deleting' is true
-            style={{ marginRight: '0.5rem' }}
-          >
-            Edit
-          </button>
+            <button
+              className="edit-button"
+              onClick={handleEdit}
+              disabled={deleting}
+              style={{ marginRight: '0.5rem' }}
+            >
+              Edit
+            </button>
           )}
           <button
             className="delete-button"
             onClick={handleDelete}
-            disabled={deleting}    // disabled while 'deleting' is true
+            disabled={deleting}
             style={{ color: 'red' }}
           >
-            {deleting ? 'Deleting...' : 'Delete'}  // exactly "Deleting..." when deleting
+            {deleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>
@@ -125,6 +131,7 @@ const handleEdit = () => {
           Last updated: {getTimeAgo(note.lastUpdated)}
         </span>
       </div>
+
       {error && (
         <p style={{ color: 'red', marginTop: '0.5rem' }}>
           {error}

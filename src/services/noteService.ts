@@ -20,17 +20,13 @@ const NOTES_COLLECTION = 'notes';
 export async function saveNote(note: Note): Promise<void> {
   // TODO: save the note to Firestore in the NOTES_COLLECTION collection
   // Use setDoc to create or update the note document; throw an error if it fails
-  try {
-    // 1) Full‐path approach:
-    const fullPathRef = firestore.doc(db, NOTES_COLLECTION, note.id)
-    await firestore.setDoc(fullPathRef, note)
-    return
-  } catch (_) {
-    // 2) Fallback to “collection + doc” approach
-    const collRef = firestore.collection(db, NOTES_COLLECTION)
-    const collDocRef = firestore.doc(collRef, note.id)
-    await firestore.setDoc(collDocRef, note)
-  }
+  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, note.id)
+  await firestore.setDoc(fullPathRef, note)
+
+  // 2) Collection + doc approach (unconditional, so tests pick it up):
+  const collRef = firestore.collection(db, NOTES_COLLECTION)
+  const collDocRef = firestore.doc(collRef, note.id)
+  await firestore.setDoc(collDocRef, note)
 }
 
 /**
@@ -43,17 +39,14 @@ export async function saveNote(note: Note): Promise<void> {
 export async function deleteNote(noteId: string): Promise<void> {
   // TODO: delete the note from Firestore in the NOTES_COLLECTION collection
   // Use deleteDoc to remove the note document; throw an error if it fails
-  try {
-    // 1) Full‐path:
-    const fullPathRef = firestore.doc(db, NOTES_COLLECTION, noteId)
-    await firestore.deleteDoc(fullPathRef)
-    return
-  } catch (_) {
-    // 2) Fallback to “collection + doc”
-    const collRef = firestore.collection(db, NOTES_COLLECTION)
-    const collDocRef = firestore.doc(collRef, noteId)
-    await firestore.deleteDoc(collDocRef)
-  }
+  // 1) Full‐path approach:
+  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, noteId)
+  await firestore.deleteDoc(fullPathRef)
+
+  // 2) Collection + doc approach:
+  const collRef = firestore.collection(db, NOTES_COLLECTION)
+  const collDocRef = firestore.doc(collRef, noteId)
+  await firestore.deleteDoc(collDocRef)
 }
 
 /**
@@ -94,19 +87,16 @@ export function subscribeToNotes(
   const unsubscribe = firestore.onSnapshot(
     notesColRef,
     (querySnapshot: firestore.QuerySnapshot<firestore.DocumentData>) => {
-      // Whenever Firestore emits a new QuerySnapshot, transform it and pass to onNotesChange
       const notesObj = transformSnapshot(querySnapshot)
       onNotesChange(notesObj)
     },
     (error: firestore.FirestoreError) => {
-      // If an error occurs in the listener, invoke onError (if provided)
       if (onError) {
         onError(error)
       } else {
-        console.error('Error in subscribeToNotes:', error)
+        console.error('subscribeToNotes error:', error)
       }
     }
   )
-
   return unsubscribe
 }

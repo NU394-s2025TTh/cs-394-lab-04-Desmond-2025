@@ -21,28 +21,39 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Start by showing “loading…”
     setLoading(true)
     setError(null)
 
-    // Subscribe once on mount
-    const unsubscribe = subscribeToNotes(
-      (newNotes: Notes) => {
-        setNotes(newNotes)
-        setLoading(false)
-      },
-      (err: Error) => {
-        setError(err.message)
-        setLoading(false)
-      }
-    )
+    // We’ll store the unsubscribe function here
+    let unsubscribeFn: () => void = () => {}
 
-    // Cleanup on unmount
+    try {
+      // Attempt to subscribe. If subscribeToNotes throws, we catch below.
+      unsubscribeFn = subscribeToNotes(
+        (newNotes: Notes) => {
+          setNotes(newNotes)
+          setLoading(false)
+        },
+        (err: Error) => {
+          setError(err.message)
+          setLoading(false)
+        }
+      )
+    } catch (err: any) {
+      // If subscribeToNotes threw synchronously (as the test mocks), catch it here:
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+
+    // Clean up the listener on unmount
     return () => {
-      unsubscribe()
+      unsubscribeFn()
     }
   }, [])
 
-  // Render loading / error / empty / list
+  // If we’re still loading, show the loading UI
   if (loading) {
     return (
       <div className="note-list">
@@ -52,6 +63,7 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
     )
   }
 
+  // If subscribeToNotes threw an error (or onError was called), show that error
   if (error) {
     return (
       <div className="note-list">
@@ -61,6 +73,7 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
     )
   }
 
+  // Otherwise, render the list (or "no notes" message)
   const noteArray = Object.values(notes)
   return (
     <div className="note-list">
@@ -70,7 +83,6 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
       ) : (
         <div className="notes-container">
           {noteArray
-            // Sort by lastUpdated descending
             .sort((a, b) => b.lastUpdated - a.lastUpdated)
             .map((note) => (
               <NoteItem key={note.id} note={note} onEdit={onEditNote} />
@@ -79,6 +91,6 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
       )}
     </div>
   )
-};
+}
 
-export default NoteList;
+export default NoteList
