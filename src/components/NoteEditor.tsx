@@ -1,12 +1,12 @@
 // REFERENCE SOLUTION - Do not distribute to students
 // src/components/NoteEditor.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { saveNote } from '../services/noteService';
+import { Note } from '../types/Note';
 // TODO: Import the saveNote function from your noteService call this to save the note to firebase
 //import { saveNote } from '../services/noteService';
-import { Note } from '../types/Note';
 
 interface NoteEditorProps {
   initialNote?: Note;
@@ -33,6 +33,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   // TODO: createState for error handling
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isSubmitting = useRef(false);
 
   // TODO: Update local state when initialNote changes in a useEffect (if editing an existing note)
   // This effect runs when the component mounts or when initialNote changes
@@ -70,6 +72,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
     setSaving(true);
     setError(null);
 
