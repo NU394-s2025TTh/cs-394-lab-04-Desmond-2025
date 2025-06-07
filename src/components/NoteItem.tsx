@@ -1,7 +1,8 @@
 // REFERENCE SOLUTION - Do not distribute to students
 // src/components/NoteItem.tsx
 import React, { useState } from 'react';
-import { deleteNote } from '../services/noteService'
+
+import { deleteNote } from '../services/noteService';
 import { Note } from '../types/Note';
 
 interface NoteItemProps {
@@ -9,14 +10,14 @@ interface NoteItemProps {
   onEdit?: (note: Note) => void;
 }
 // TODO: delete eslint-disable-next-line when you implement the onEdit handler
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: manage state for deleting status and error message
   // TODO: create a function to handle the delete action, which will display a confirmation (window.confirm) and call the deleteNote function from noteService,
   // and update the deleting status and error message accordingly
 
-  const [deleting, setDeleting] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -69,27 +70,29 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: show error message if there is an error deleting the note
   // TODO: only show the edit button when the onEdit prop is provided
   const handleDelete = async () => {
-  const confirmed = window.confirm('Are you sure you want to delete this note?')
-  if (!confirmed) return
+    const confirmed = window.confirm('Are you sure you want to delete this note?');
+    if (!confirmed) return;
 
-  setDeleting(true)
-  setError(null)
+    setDeleting(true);
+    setError(null);
 
-  try {
-    await deleteNote(note.id)
-    // Firestore subscription will automatically remove it from the list
-  } catch (err: any) {
-    setError(err.message)
-  } finally {
-    setDeleting(false)
-  }
-}
+    deleteNote(note.id)
+      .then(() => {
+        // success: leave `deleting` = true
+      })
+      .catch((err: unknown) => {
+        // error: show message and re-enable the buttons
+        const message = err instanceof Error ? err.message : 'Failed to delete note.';
+        setError(message);
+        setDeleting(false);
+      });
+  };
 
-const handleEdit = () => {
-  if (onEdit) {
-    onEdit(note)
-  }
-}
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(note);
+    }
+  };
   return (
     <div
       className="note-item"
@@ -132,13 +135,9 @@ const handleEdit = () => {
         </span>
       </div>
 
-      {error && (
-        <p style={{ color: 'red', marginTop: '0.5rem' }}>
-          {error}
-        </p>
-      )}
+      {error && <p style={{ color: 'red', marginTop: '0.5rem' }}>{error}</p>}
     </div>
-  )
+  );
 };
 
 export default NoteItem;

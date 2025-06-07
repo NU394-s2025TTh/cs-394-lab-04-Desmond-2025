@@ -1,7 +1,7 @@
 // REFERENCE SOLUTION - Do not distribute to students
 // src/services/noteService.ts
 // TODO: Import functions like setDoc, deleteDoc, onSnapshot from Firebase Firestore to interact with the database
-import * as firestore from 'firebase/firestore'
+import * as firestore from 'firebase/firestore';
 
 // TODO: Import the Firestore instance from your Firebase configuration file
 import { db } from '../firebase-config';
@@ -20,13 +20,13 @@ const NOTES_COLLECTION = 'notes';
 export async function saveNote(note: Note): Promise<void> {
   // TODO: save the note to Firestore in the NOTES_COLLECTION collection
   // Use setDoc to create or update the note document; throw an error if it fails
-  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, note.id)
-  await firestore.setDoc(fullPathRef, note)
+  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, note.id);
+  await firestore.setDoc(fullPathRef, note);
 
   // 2) Collection + doc approach (unconditional, so tests pick it up):
-  const collRef = firestore.collection(db, NOTES_COLLECTION)
-  const collDocRef = firestore.doc(collRef, note.id)
-  await firestore.setDoc(collDocRef, note)
+  const collRef = firestore.collection(db, NOTES_COLLECTION);
+  const collDocRef = firestore.doc(collRef, note.id);
+  await firestore.setDoc(collDocRef, note);
 }
 
 /**
@@ -40,13 +40,13 @@ export async function deleteNote(noteId: string): Promise<void> {
   // TODO: delete the note from Firestore in the NOTES_COLLECTION collection
   // Use deleteDoc to remove the note document; throw an error if it fails
   // 1) Full‐path approach:
-  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, noteId)
-  await firestore.deleteDoc(fullPathRef)
+  const fullPathRef = firestore.doc(db, NOTES_COLLECTION, noteId);
+  await firestore.deleteDoc(fullPathRef);
 
   // 2) Collection + doc approach:
-  const collRef = firestore.collection(db, NOTES_COLLECTION)
-  const collDocRef = firestore.doc(collRef, noteId)
-  await firestore.deleteDoc(collDocRef)
+  const collRef = firestore.collection(db, NOTES_COLLECTION);
+  const collDocRef = firestore.doc(collRef, noteId);
+  await firestore.deleteDoc(collDocRef);
 }
 
 /**
@@ -54,13 +54,17 @@ export async function deleteNote(noteId: string): Promise<void> {
  * @param snapshot Firestore query snapshot
  * @returns Notes object with note ID as keys
  */
-export function transformSnapshot(snapshot: firestore.QuerySnapshot<firestore.DocumentData>): Notes {
-  const notes: Notes = {}
-  snapshot.docs.forEach((docSnap: firestore.QueryDocumentSnapshot<firestore.DocumentData>) => {
-    const noteData = docSnap.data() as Note
-    notes[docSnap.id] = noteData
-  })
-  return notes
+export function transformSnapshot(
+  snapshot: firestore.QuerySnapshot<firestore.DocumentData>,
+): Notes {
+  const notes: Notes = {};
+  snapshot.docs.forEach(
+    (docSnap: firestore.QueryDocumentSnapshot<firestore.DocumentData>) => {
+      const noteData = docSnap.data() as Note;
+      notes[docSnap.id] = noteData;
+    },
+  );
+  return notes;
 }
 
 /**
@@ -81,22 +85,22 @@ export function subscribeToNotes(
   // Handle errors by calling onError if provided
   // Return s proper (not empty) unsubscribe function to stop listening for changes
   // Reference the entire `notes` collection:
-  const notesColRef = firestore.collection(db, NOTES_COLLECTION)
+  const notesColRef = firestore.collection(db, NOTES_COLLECTION);
 
   // onSnapshot returns an unsubscribe function
   const unsubscribe = firestore.onSnapshot(
     notesColRef,
     (querySnapshot: firestore.QuerySnapshot<firestore.DocumentData>) => {
-      const notesObj = transformSnapshot(querySnapshot)
-      onNotesChange(notesObj)
+      const notesObj = transformSnapshot(querySnapshot);
+      onNotesChange(notesObj);
     },
     (error: firestore.FirestoreError) => {
       if (onError) {
-        onError(error)
+        onError(error);
       } else {
-        console.error('subscribeToNotes error:', error)
+        console.error('subscribeToNotes error:', error);
       }
-    }
-  )
-  return unsubscribe
+    },
+  );
+  return unsubscribe;
 }

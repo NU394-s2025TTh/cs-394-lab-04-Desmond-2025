@@ -16,42 +16,46 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
   // TODO: display a loading message while notes are being loaded; error message if there is an error
 
   // State for notes, loading, and error
-  const [notes, setNotes] = useState<Notes>({})
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+  const [notes, setNotes] = useState<Notes>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Start by showing “loading…”
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     // We’ll store the unsubscribe function here
-    let unsubscribeFn: () => void = () => {}
+    let unsubscribeFn: () => void = () => {};
 
     try {
       // Attempt to subscribe. If subscribeToNotes throws, we catch below.
       unsubscribeFn = subscribeToNotes(
         (newNotes: Notes) => {
-          setNotes(newNotes)
-          setLoading(false)
+          setNotes(newNotes);
+          setLoading(false);
         },
         (err: Error) => {
-          setError(err.message)
-          setLoading(false)
-        }
-      )
-    } catch (err: any) {
+          setError(err.message);
+          setLoading(false);
+        },
+      );
+    } catch (err: unknown) {
       // If subscribeToNotes threw synchronously (as the test mocks), catch it here:
-      setError(err.message)
-      setLoading(false)
-      return
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
+      setLoading(false);
+      return;
     }
 
     // Clean up the listener on unmount
     return () => {
-      unsubscribeFn()
-    }
-  }, [])
+      unsubscribeFn();
+    };
+  }, []);
 
   // If we’re still loading, show the loading UI
   if (loading) {
@@ -60,7 +64,7 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
         <h2>Notes</h2>
         <p>Loading notes...</p>
       </div>
-    )
+    );
   }
 
   // If subscribeToNotes threw an error (or onError was called), show that error
@@ -70,11 +74,11 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
         <h2>Notes</h2>
         <p style={{ color: 'red' }}>Error: {error}</p>
       </div>
-    )
+    );
   }
 
   // Otherwise, render the list (or "no notes" message)
-  const noteArray = Object.values(notes)
+  const noteArray = Object.values(notes);
   return (
     <div className="note-list">
       <h2>Notes</h2>
@@ -90,7 +94,7 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default NoteList
+export default NoteList;

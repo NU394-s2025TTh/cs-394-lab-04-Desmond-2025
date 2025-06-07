@@ -2,8 +2,8 @@
 // src/components/NoteEditor.tsx
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { saveNote } from '../services/noteService';
 
+import { saveNote } from '../services/noteService';
 // TODO: Import the saveNote function from your noteService call this to save the note to firebase
 //import { saveNote } from '../services/noteService';
 import { Note } from '../types/Note';
@@ -13,11 +13,11 @@ interface NoteEditorProps {
   onSave?: (note: Note) => void;
 }
 // remove the eslint disable when you implement on save
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   // State for the current note being edited
   // remove the eslint disable when you implement the state
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [note, setNote] = useState<Note>(() => {
     return (
       initialNote || {
@@ -31,8 +31,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
 
   // TODO: create state for saving status
   // TODO: createState for error handling
-  const [saving, setSaving] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // TODO: Update local state when initialNote changes in a useEffect (if editing an existing note)
   // This effect runs when the component mounts or when initialNote changes
@@ -46,39 +46,39 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   // TODO: for the save button, show "Saving..." while saving is happening and "Save Note" when not saving
   // TODO: show an error message if there is an error saving the note
   useEffect(() => {
-  if (initialNote) {
-    setNote(initialNote)
-  } else {
-    // Reset to a brand‐new note if no initialNote is provided
-    setNote({
-      id: uuidv4(),
-      title: '',
-      content: '',
-      lastUpdated: Date.now(),
-    })
-  }
-  }, [initialNote])
+    if (initialNote) {
+      setNote(initialNote);
+    } else {
+      // Reset to a brand‐new note if no initialNote is provided
+      setNote({
+        id: uuidv4(),
+        title: '',
+        content: '',
+        lastUpdated: Date.now(),
+      });
+    }
+  }, [initialNote]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setNote((prev) => ({
       ...prev,
       [name]: value,
       lastUpdated: Date.now(),
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
 
     try {
       // Update `lastUpdated` to now:
-      const noteToSave: Note = { ...note, lastUpdated: Date.now() }
-      await saveNote(noteToSave)
+      const noteToSave: Note = { ...note, lastUpdated: Date.now() };
+      await saveNote(noteToSave);
       if (onSave) {
-        onSave(noteToSave)
+        onSave(noteToSave);
       }
       // After saving, we could also clear fields if we want to “reset” the editor:
       setNote({
@@ -86,21 +86,34 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         title: '',
         content: '',
         lastUpdated: Date.now(),
-      })
-    } catch (err: any) {
-      setError(err.message)
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   // Decide which button label to show:
-  const isEditing = Boolean(initialNote)
-  const buttonLabel = isEditing ? (saving ? 'Updating...' : 'Update Note') : (saving ? 'Saving...' : 'Save Note')
-
+  const isEditing = Boolean(initialNote);
+  const buttonLabel = isEditing
+    ? saving
+      ? 'Updating...'
+      : 'Update Note'
+    : saving
+      ? 'Saving...'
+      : 'Save Note';
 
   return (
-    <form className="note-editor" onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '1rem', marginTop: '1rem' }}>
+    <form
+      className="note-editor"
+      onSubmit={handleSubmit}
+      style={{ border: '1px solid #ccc', padding: '1rem', marginTop: '1rem' }}
+    >
       <div className="form-group" style={{ marginBottom: '0.5rem' }}>
         <label htmlFor="title">Title</label>
         <br />
@@ -133,11 +146,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         />
       </div>
 
-      {error && (
-        <p style={{ color: 'red', marginBottom: '0.5rem' }}>
-          {error}
-        </p>
-      )}
+      {error && <p style={{ color: 'red', marginBottom: '0.5rem' }}>{error}</p>}
 
       <div className="form-actions">
         <button type="submit" disabled={saving} style={{ padding: '0.5rem 1rem' }}>
@@ -145,7 +154,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         </button>
       </div>
     </form>
-  )
+  );
 };
 
 export default NoteEditor;
